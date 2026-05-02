@@ -10,4 +10,7 @@ coverage/
 .turbo/
 .vitest/
 .atl/
+.opencode/
+playwright-report/
+test-results/
 BLUEPRINT.md
