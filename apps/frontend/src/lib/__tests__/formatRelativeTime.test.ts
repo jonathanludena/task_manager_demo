@@ -46,6 +46,18 @@ describe('formatRelativeTime', () => {
     const result = formatRelativeTime(new Date('2026-04-28T10:00:00Z').toISOString());
     expect(result).toMatch(/^\d{1,2} [a-z]{3} \d{2}:\d{2}$/i);
   });
+
+  it('returns "Ahora mismo" for near future dates (< 1 min)', () => {
+    expect(formatRelativeTime(new Date('2026-05-02T12:00:20Z').toISOString())).toBe('Ahora mismo');
+  });
+
+  it('returns "En X minutos" for future minutes', () => {
+    expect(formatRelativeTime(new Date('2026-05-02T12:05:00Z').toISOString())).toBe('En 5 minutos');
+  });
+
+  it('returns "En 1 hora" for one hour in the future', () => {
+    expect(formatRelativeTime(new Date('2026-05-02T13:00:00Z').toISOString())).toBe('En 1 hora');
+  });
 });
 
 describe('formatRelativeTimeShort', () => {
@@ -73,5 +85,13 @@ describe('formatRelativeTimeShort', () => {
   it('returns short date for older dates', () => {
     const result = formatRelativeTimeShort(new Date('2026-04-28T10:00:00Z').toISOString());
     expect(result).toMatch(/^\d{1,2} [a-z]{3}$/i);
+  });
+
+  it('returns "+Xm" for future minutes', () => {
+    expect(formatRelativeTimeShort(new Date('2026-05-02T12:05:00Z').toISOString())).toBe('+5m');
+  });
+
+  it('returns "+Xh" for future hours', () => {
+    expect(formatRelativeTimeShort(new Date('2026-05-02T14:00:00Z').toISOString())).toBe('+2h');
   });
 });

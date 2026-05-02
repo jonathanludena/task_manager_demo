@@ -2,10 +2,47 @@ const MINUTE = 60_000;
 const HOUR = 3_600_000;
 const THREE_HOURS = 10_800_000;
 
+const abs = Math.abs;
+
+function formatFutureDate(isoString: string): string {
+  const d = new Date(isoString);
+  const today = new Date();
+  const timeStr = d.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+
+  const isToday =
+    d.getDate() === today.getDate() &&
+    d.getMonth() === today.getMonth() &&
+    d.getFullYear() === today.getFullYear();
+
+  if (isToday) {
+    return `Hoy ${timeStr}`;
+  }
+
+  return `${d.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })} ${timeStr}`;
+}
+
+function formatFutureRelative(absDiff: number, isoString: string): string {
+  if (absDiff < MINUTE) return 'Ahora mismo';
+  if (absDiff < HOUR) {
+    const mins = Math.floor(absDiff / MINUTE);
+    return mins === 1 ? 'En 1 minuto' : `En ${mins} minutos`;
+  }
+  if (absDiff < THREE_HOURS) {
+    const hours = Math.floor(absDiff / HOUR);
+    return hours === 1 ? 'En 1 hora' : `En ${hours} horas`;
+  }
+  return formatFutureDate(isoString);
+}
+
 export function formatRelativeTime(isoString: string): string {
   const now = Date.now();
   const date = new Date(isoString).getTime();
   const diff = now - date;
+
+  // Fecha futura
+  if (diff < 0) {
+    return formatFutureRelative(abs(diff), isoString);
+  }
 
   if (diff < MINUTE) {
     return 'Ahora mismo';
@@ -21,7 +58,7 @@ export function formatRelativeTime(isoString: string): string {
     return hours === 1 ? 'Hace 1 hora' : `Hace ${hours} horas`;
   }
 
-  // More than 3 hours: show date with time
+  // More than 3 hours in the past: show date with time
   const d = new Date(isoString);
   const today = new Date();
   const isToday =
@@ -53,6 +90,15 @@ export function formatRelativeTimeShort(isoString: string): string {
   const now = Date.now();
   const date = new Date(isoString).getTime();
   const diff = now - date;
+
+  // Fecha futura
+  if (diff < 0) {
+    const absDiff = abs(diff);
+    if (absDiff < MINUTE) return 'Ahora';
+    if (absDiff < HOUR) return `+${Math.floor(absDiff / MINUTE)}m`;
+    if (absDiff < THREE_HOURS) return `+${Math.floor(absDiff / HOUR)}h`;
+    return new Date(isoString).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+  }
 
   if (diff < MINUTE) return 'Ahora';
   if (diff < HOUR) return `${Math.floor(diff / MINUTE)}m`;
