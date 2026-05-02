@@ -1,0 +1,29 @@
+import { describe, it, expect, vi } from 'vitest';
+import { render, screen } from '@/test/renderWithProviders';
+import { TaskList } from '../TaskList';
+
+const tasks = [
+  { id: '1', title: 'Task 1', description: 'Desc 1', completed: false, createdAt: '2026-05-01T00:00:00Z' },
+  { id: '2', title: 'Task 2', description: 'Desc 2', completed: true, createdAt: '2026-05-01T00:00:00Z' },
+];
+
+describe('TaskList', () => {
+  it('renders a list of tasks', () => {
+    render(<TaskList tasks={tasks} onComplete={vi.fn()} />);
+
+    expect(screen.getByText('Task 1')).toBeInTheDocument();
+    expect(screen.getByText('Task 2')).toBeInTheDocument();
+  });
+
+  it('renders empty message when no tasks', () => {
+    render(<TaskList tasks={[]} onComplete={vi.fn()} />);
+
+    expect(screen.getByText(/no hay tareas/i)).toBeInTheDocument();
+  });
+
+  it('shows completed badge for completed tasks', () => {
+    render(<TaskList tasks={tasks} onComplete={vi.fn()} />);
+
+    expect(screen.getByText(/completada/i)).toBeInTheDocument();
+  });
+});
