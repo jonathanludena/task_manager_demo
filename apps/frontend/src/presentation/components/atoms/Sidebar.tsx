@@ -35,8 +35,24 @@ export function Sidebar() {
   /* eslint-enable react-hooks/set-state-in-effect */
 
   const navItems = [
-    { to: '/', label: 'Tareas', icon: '📋' },
-    { to: '/create', label: 'Nueva Tarea', icon: '➕' },
+    {
+      to: '/',
+      label: 'Tareas',
+      icon: (
+        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      ),
+    },
+    {
+      to: '/create',
+      label: 'Nueva Tarea',
+      icon: (
+        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+        </svg>
+      ),
+    },
   ];
 
   return (
@@ -61,7 +77,7 @@ export function Sidebar() {
                   : 'text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800'
               }`}
             >
-              <span className="mr-2">{item.icon}</span>
+              <span className="mr-2 inline-flex items-center">{item.icon}</span>
               {item.label}
             </Link>
           );
