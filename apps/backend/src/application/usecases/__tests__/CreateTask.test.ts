@@ -17,6 +17,7 @@ describe('CreateTaskUseCase', () => {
     const mockRepository: TaskRepository = {
       save: vi.fn().mockResolvedValue(mockTask),
       findAll: vi.fn(),
+      findById: vi.fn(),
     };
 
     const useCase = new CreateTaskUseCase(mockRepository);
@@ -44,6 +45,7 @@ describe('CreateTaskUseCase', () => {
     const mockRepository: TaskRepository = {
       save: vi.fn().mockImplementation(async (task: Task) => task),
       findAll: vi.fn(),
+      findById: vi.fn(),
     };
 
     const useCase = new CreateTaskUseCase(mockRepository);
@@ -65,6 +67,7 @@ describe('CreateTaskUseCase', () => {
         return task;
       }),
       findAll: vi.fn(),
+      findById: vi.fn(),
     };
 
     const useCase = new CreateTaskUseCase(mockRepository);

@@ -1,5 +1,8 @@
 import { DataSource } from 'typeorm';
+import { join } from 'path';
 import { env } from '../config/env';
+
+const isProduction = env.NODE_ENV === 'production';
 
 export const AppDataSource = new DataSource({
   type: 'postgres',
@@ -8,7 +11,11 @@ export const AppDataSource = new DataSource({
   username: env.DB_USER,
   password: env.DB_PASSWORD,
   database: env.DB_NAME,
-  entities: ['src/domain/entities/**/*.ts'],
-  synchronize: false,
+  entities: [
+    isProduction
+      ? join(__dirname, '../../domain/entities/**/*.js')
+      : join(__dirname, '../../domain/entities/**/*.ts'),
+  ],
+  synchronize: !isProduction,
   logging: false,
 });

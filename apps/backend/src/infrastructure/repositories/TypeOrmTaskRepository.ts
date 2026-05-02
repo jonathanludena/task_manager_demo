@@ -12,4 +12,8 @@ export class TypeOrmTaskRepository implements TaskRepository {
   async findAll(): Promise<Task[]> {
     return this.dataSource.manager.find(Task);
   }
+
+  async findById(id: string): Promise<Task | null> {
+    return this.dataSource.manager.findOneBy(Task, { id });
+  }
 }
