@@ -10,25 +10,29 @@ describe('TaskForm', () => {
     expect(screen.getByLabelText(/descripción/i)).toBeInTheDocument();
   });
 
-  it('shows validation error when title is empty on submit', async () => {
+  it('shows validation error when title is too short', async () => {
     const { user } = render(<TaskForm onSubmit={vi.fn()} isSubmitting={false} />);
+
+    // Escribir solo 1 carácter (menos de 3)
+    const input = screen.getByLabelText(/título/i);
+    await user.type(input, 'ab');
 
     await user.click(screen.getByRole('button', { name: /crear/i }));
 
-    expect(screen.getByText(/el título es requerido/i)).toBeInTheDocument();
+    expect(screen.getByText(/al menos 3 caracteres/i)).toBeInTheDocument();
   });
 
   it('calls onSubmit with title and description', async () => {
     const onSubmit = vi.fn();
     const { user } = render(<TaskForm onSubmit={onSubmit} isSubmitting={false} />);
 
-    await user.type(screen.getByLabelText(/título/i), 'New task');
-    await user.type(screen.getByLabelText(/descripción/i), 'Task description');
+    await user.type(screen.getByLabelText(/título/i), 'Mi nueva tarea');
+    await user.type(screen.getByLabelText(/descripción/i), 'Descripción de prueba');
     await user.click(screen.getByRole('button', { name: /crear/i }));
 
     expect(onSubmit).toHaveBeenCalledWith({
-      title: 'New task',
-      description: 'Task description',
+      title: 'Mi nueva tarea',
+      description: 'Descripción de prueba',
     });
   });
 
@@ -42,12 +46,58 @@ describe('TaskForm', () => {
     const onSubmit = vi.fn();
     const { user } = render(<TaskForm onSubmit={onSubmit} isSubmitting={false} />);
 
-    await user.type(screen.getByLabelText(/título/i), 'Only title');
+    await user.type(screen.getByLabelText(/título/i), 'Solo título válido');
     await user.click(screen.getByRole('button', { name: /crear/i }));
 
     expect(onSubmit).toHaveBeenCalledWith({
-      title: 'Only title',
+      title: 'Solo título válido',
       description: '',
     });
+  });
+
+  it('sanitizes SQL injection characters from title', async () => {
+    const onSubmit = vi.fn();
+    const { user } = render(<TaskForm onSubmit={onSubmit} isSubmitting={false} />);
+
+    const input = screen.getByLabelText(/título/i);
+    await user.type(input, "Tarea'; DROP TABLE tasks;--");
+
+    await user.click(screen.getByRole('button', { name: /crear/i }));
+
+    // Los caracteres ' ; - deben ser eliminados; queda solo texto limpio
+    expect(onSubmit).toHaveBeenCalledWith({
+      title: 'Tarea DROP TABLE tasks',
+      description: '',
+    });
+  });
+
+  it('allows ñ, period and comma in title', async () => {
+    const onSubmit = vi.fn();
+    const { user } = render(<TaskForm onSubmit={onSubmit} isSubmitting={false} />);
+
+    const input = screen.getByLabelText(/título/i);
+    await user.type(input, 'Tarea con ñ, punto y coma.');
+
+    await user.click(screen.getByRole('button', { name: /crear/i }));
+
+    expect(onSubmit).toHaveBeenCalledWith({
+      title: 'Tarea con ñ, punto y coma.',
+      description: '',
+    });
+  });
+
+  it('shows character counter for description', () => {
+    render(<TaskForm onSubmit={vi.fn()} isSubmitting={false} />);
+
+    expect(screen.getByText('0/500')).toBeInTheDocument();
+  });
+
+  it('updates character counter when typing description', async () => {
+    const { user } = render(<TaskForm onSubmit={vi.fn()} isSubmitting={false} />);
+
+    const textarea = screen.getByLabelText(/descripción/i);
+    await user.type(textarea, 'Hola');
+
+    expect(screen.getByText('4/500')).toBeInTheDocument();
   });
 });

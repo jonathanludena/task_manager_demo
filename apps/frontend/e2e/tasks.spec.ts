@@ -56,12 +56,12 @@ test.describe('Task Management - E2E Flows', () => {
       await expect(page.getByText('Mi nueva tarea E2E')).toBeVisible({ timeout: 10000 });
     });
 
-    test('debe mostrar error de validación si el título está vacío', async ({ page }) => {
+    test('debe mostrar error de validación si el título es muy corto', async ({ page }) => {
       await page.goto('/create');
 
       await page.getByRole('button', { name: /crear tarea/i }).click();
 
-      await expect(page.getByText(/el título es requerido/i)).toBeVisible();
+      await expect(page.getByText(/al menos 3 caracteres/i)).toBeVisible();
     });
 
     test('debe crear tarea sin descripción', async ({ page }) => {

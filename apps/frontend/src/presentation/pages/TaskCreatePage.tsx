@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { TaskForm } from '@/presentation/components/organisms/TaskForm';
 import { taskApi } from '@/core/api/taskApi';
 import { notifyTasksUpdated } from '@/lib/taskEvents';
@@ -35,6 +35,12 @@ export function TaskCreatePage() {
       )}
 
       <TaskForm onSubmit={handleSubmit} isSubmitting={isSubmitting} />
+
+      <div className="mt-4 text-center">
+        <Link to="/" className="text-sm text-gray-500 underline underline-offset-2 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+          Cancelar y volver a todas las tareas
+        </Link>
+      </div>
     </div>
   );
 }
