@@ -26,11 +26,12 @@ interface TaskFormProps {
 
 /**
  * Filtra caracteres que podrían usarse para SQL injection.
- * Solo permite: letras (con acentos y ñ), números, espacios, punto, coma.
- * Bloquea: ', ", ;, -, /, *, (, ), etc.
+ * Permite: cualquier letra Unicode (incluye acentos, ñ, ü, etc.),
+ * números, espacios, punto y coma.
+ * Bloquea: ', ", ;, -, /, *, (, ), \, `, %, etc.
  */
 function sanitize(value: string): string {
-  return value.replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑüÜ\s.,]/g, '');
+  return value.replace(/[^\p{L}\p{N}\s.,]/gu, '');
 }
 
 export function TaskForm({ onSubmit, isSubmitting }: TaskFormProps) {

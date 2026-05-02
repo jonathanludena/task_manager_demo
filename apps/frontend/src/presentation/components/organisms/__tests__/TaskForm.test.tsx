@@ -71,17 +71,17 @@ describe('TaskForm', () => {
     });
   });
 
-  it('allows ñ, period and comma in title', async () => {
+  it('allows ñ, tildes, period and comma in title', async () => {
     const onSubmit = vi.fn();
     const { user } = render(<TaskForm onSubmit={onSubmit} isSubmitting={false} />);
 
     const input = screen.getByLabelText(/título/i);
-    await user.type(input, 'Tarea con ñ, punto y coma.');
+    await user.type(input, 'Canción, álbum, función, núcleo, árbol.');
 
     await user.click(screen.getByRole('button', { name: /crear/i }));
 
     expect(onSubmit).toHaveBeenCalledWith({
-      title: 'Tarea con ñ, punto y coma.',
+      title: 'Canción, álbum, función, núcleo, árbol.',
       description: '',
     });
   });
