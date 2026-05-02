@@ -1,9 +1,8 @@
 import type { Task } from '../entities/Task';
+import type { TaskFilters } from '@task-manager/shared';
 
-export interface TaskFilters {
-  status?: 'completed' | 'pending';
-  search?: string;
-}
+// Re-export para compatibilidad
+export type { TaskFilters };
 
 export interface TaskRepository {
   save(task: Task): Promise<Task>;

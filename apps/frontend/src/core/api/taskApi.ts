@@ -1,17 +1,8 @@
 import { env } from '../config/env';
+import type { TaskDTO, CreateTaskPayload, TaskFilters } from '@task-manager/shared';
 
-export interface TaskDTO {
-  id: string;
-  title: string;
-  description: string;
-  completed: boolean;
-  createdAt: string;
-}
-
-export interface CreateTaskPayload {
-  title: string;
-  description?: string;
-}
+// Re-export for backward compatibility with consumers
+export type { TaskDTO, CreateTaskPayload, TaskFilters };
 
 const BASE_URL = env.API_URL;
 
@@ -30,13 +21,8 @@ async function request<T>(url: string, options?: RequestInit): Promise<T> {
   return response.json() as Promise<T>;
 }
 
-export interface FetchTasksParams {
-  status?: 'completed' | 'pending';
-  search?: string;
-}
-
 export const taskApi = {
-  fetchTasks(params?: FetchTasksParams): Promise<TaskDTO[]> {
+  fetchTasks(params?: TaskFilters): Promise<TaskDTO[]> {
     const query = new URLSearchParams();
     if (params?.status) query.set('status', params.status);
     if (params?.search) query.set('search', params.search);

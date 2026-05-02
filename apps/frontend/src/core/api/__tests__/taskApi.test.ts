@@ -36,6 +36,39 @@ describe('taskApi', () => {
 
       await expect(taskApi.fetchTasks()).rejects.toThrow('Failed to fetch tasks');
     });
+
+    it('should pass query params for status filter', async () => {
+      vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+        ok: true,
+        json: async () => [],
+      } as Response);
+
+      await taskApi.fetchTasks({ status: 'completed' });
+
+      expect(fetch).toHaveBeenCalledWith(`${API_URL}/tasks?status=completed`, undefined);
+    });
+
+    it('should pass query params for search filter', async () => {
+      vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+        ok: true,
+        json: async () => [],
+      } as Response);
+
+      await taskApi.fetchTasks({ search: 'test' });
+
+      expect(fetch).toHaveBeenCalledWith(`${API_URL}/tasks?search=test`, undefined);
+    });
+
+    it('should pass both filters', async () => {
+      vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+        ok: true,
+        json: async () => [],
+      } as Response);
+
+      await taskApi.fetchTasks({ status: 'pending', search: 'test' });
+
+      expect(fetch).toHaveBeenCalledWith(`${API_URL}/tasks?status=pending&search=test`, undefined);
+    });
   });
 
   describe('createTask', () => {
