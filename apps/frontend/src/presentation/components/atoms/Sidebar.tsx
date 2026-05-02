@@ -35,7 +35,7 @@ export function Sidebar() {
   ];
 
   return (
-    <aside className="hidden w-64 flex-shrink-0 border-r border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-900 sm:flex sm:flex-col">
+    <aside className="sticky top-0 hidden h-screen w-64 flex-shrink-0 border-r border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-900 sm:flex sm:flex-col">
       <div className="mb-6">
         <Link to="/" className="text-base font-bold text-gray-900 dark:text-white">
           Task Manager

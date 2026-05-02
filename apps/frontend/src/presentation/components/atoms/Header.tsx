@@ -6,7 +6,7 @@ export function Header() {
   const { theme, toggleTheme } = useTheme();
 
   return (
-    <header className="border-b border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900">
+    <header className="sticky top-0 z-10 border-b border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900">
       <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-3">
         <Link to="/" className="text-lg font-bold text-gray-900 dark:text-white">
           Task Manager
