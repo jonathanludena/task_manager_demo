@@ -1,0 +1,12 @@
+{
+  "private": true,
+  "scripts": {
+    "dev": "pnpm -r dev",
+    "test": "pnpm -r test",
+    "lint": "pnpm -r lint",
+    "typecheck": "pnpm -r typecheck"
+  },
+  "devDependencies": {
+    "typescript": "5.8.3"
+  }
+}
