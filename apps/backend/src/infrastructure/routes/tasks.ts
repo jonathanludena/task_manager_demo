@@ -8,6 +8,10 @@ interface CreateTaskBody {
   description?: string;
 }
 
+interface PatchCompleteBody {
+  completed?: boolean;
+}
+
 const createTaskSchema = {
   body: {
     type: 'object',
@@ -15,6 +19,15 @@ const createTaskSchema = {
     properties: {
       title: { type: 'string', minLength: 1 },
       description: { type: 'string' },
+    },
+  },
+};
+
+const patchCompleteSchema = {
+  body: {
+    type: 'object',
+    properties: {
+      completed: { type: 'boolean' },
     },
   },
 };
@@ -50,10 +63,11 @@ export function buildTaskRoutes(
       return getAllTasks.execute(hasFilters ? filters : undefined);
     });
 
-    server.patch<{ Params: { id: string }; Body: { completed?: boolean } }>(
+    server.patch<{ Params: { id: string }; Body: PatchCompleteBody }>(
       '/tasks/:id/complete',
+      { schema: patchCompleteSchema },
       async (
-        request: FastifyRequest<{ Params: { id: string }; Body: { completed?: boolean } }>,
+        request: FastifyRequest<{ Params: { id: string }; Body: PatchCompleteBody }>,
         reply: FastifyReply,
       ) => {
         const completed = request.body?.completed ?? true;

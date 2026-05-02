@@ -161,6 +161,7 @@ describe('Task routes', () => {
       const response = await server.inject({
         method: 'PATCH',
         url: '/tasks/abc-123/complete',
+        payload: {},
       });
 
       expect(response.statusCode).toBe(200);
@@ -180,9 +181,85 @@ describe('Task routes', () => {
       const response = await server.inject({
         method: 'PATCH',
         url: '/tasks/nonexistent/complete',
+        payload: {},
       });
 
       expect(response.statusCode).toBe(404);
+      await server.close();
+    });
+
+    it('should accept completed=false and return 200', async () => {
+      const existingTask = new Task('abc-123', 'My task', 'Desc', true, new Date('2026-01-01'));
+
+      server = buildTestServer({
+        save: vi.fn().mockImplementation(async (task: Task) => task),
+        findAll: vi.fn(),
+        findById: vi.fn().mockResolvedValue(existingTask),
+      });
+
+      const response = await server.inject({
+        method: 'PATCH',
+        url: '/tasks/abc-123/complete',
+        payload: { completed: false },
+      });
+
+      expect(response.statusCode).toBe(200);
+      expect(response.json().completed).toBe(false);
+      await server.close();
+    });
+
+    it('should return 400 when completed is a string', async () => {
+      server = buildTestServer({
+        save: vi.fn(),
+        findAll: vi.fn(),
+        findById: vi.fn(),
+      });
+
+      const response = await server.inject({
+        method: 'PATCH',
+        url: '/tasks/abc-123/complete',
+        payload: { completed: 'not-a-boolean' },
+      });
+
+      expect(response.statusCode).toBe(400);
+      await server.close();
+    });
+
+    it('should return 400 when completed is a number', async () => {
+      server = buildTestServer({
+        save: vi.fn(),
+        findAll: vi.fn(),
+        findById: vi.fn(),
+      });
+
+      const response = await server.inject({
+        method: 'PATCH',
+        url: '/tasks/abc-123/complete',
+        payload: { completed: 123 },
+      });
+
+      expect(response.statusCode).toBe(400);
+      await server.close();
+    });
+
+    it('should coerce null to false and return 200', async () => {
+      const existingTask = new Task('abc-123', 'My task', 'Desc', true, new Date('2026-01-01'));
+
+      server = buildTestServer({
+        save: vi.fn().mockImplementation(async (task: Task) => task),
+        findAll: vi.fn(),
+        findById: vi.fn().mockResolvedValue(existingTask),
+      });
+
+      const response = await server.inject({
+        method: 'PATCH',
+        url: '/tasks/abc-123/complete',
+        payload: { completed: null },
+      });
+
+      // Fastify coerces null → false for type: 'boolean'
+      expect(response.statusCode).toBe(200);
+      expect(response.json().completed).toBe(false);
       await server.close();
     });
   });
