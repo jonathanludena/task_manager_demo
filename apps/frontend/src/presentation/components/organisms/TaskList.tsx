@@ -3,13 +3,13 @@ import type { TaskDTO } from '@/core/api/taskApi';
 
 interface TaskListProps {
   tasks: TaskDTO[];
-  onComplete: (id: string) => void;
+  onComplete: (id: string, completed: boolean) => void;
 }
 
 export function TaskList({ tasks, onComplete }: TaskListProps) {
   if (tasks.length === 0) {
     return (
-      <div className="py-12 text-center text-gray-500">
+      <div className="py-12 text-center text-gray-500 dark:text-gray-400">
         <p>No hay tareas todavía.</p>
         <p className="mt-1 text-sm">Crea una nueva tarea para empezar.</p>
       </div>
@@ -17,9 +17,9 @@ export function TaskList({ tasks, onComplete }: TaskListProps) {
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2">
       {tasks.map((task) => (
-        <TaskCard key={task.id} task={task} onComplete={onComplete} />
+        <TaskCard key={task.id} task={task} onToggle={onComplete} />
       ))}
     </div>
   );

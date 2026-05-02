@@ -4,7 +4,7 @@ import type { TaskRepository } from '../../domain/repositories/TaskRepository';
 export class MarkTaskCompleteUseCase {
   constructor(private readonly repository: TaskRepository) {}
 
-  async execute(id: string): Promise<Task | null> {
+  async execute(id: string, completed: boolean = true): Promise<Task | null> {
     const task = await this.repository.findById(id);
 
     if (!task) {
@@ -15,7 +15,7 @@ export class MarkTaskCompleteUseCase {
       task.id,
       task.title,
       task.description,
-      true,
+      completed,
       task.createdAt,
     );
 

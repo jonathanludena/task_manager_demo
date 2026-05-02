@@ -1,7 +1,7 @@
 import type { Task } from '../entities/Task';
 
 export interface TaskFilters {
-  status?: 'completed' | 'incomplete';
+  status?: 'completed' | 'pending';
   search?: string;
 }
 

@@ -14,7 +14,7 @@ export class TypeOrmTaskRepository implements TaskRepository {
 
     if (filters?.status === 'completed') {
       where.completed = true;
-    } else if (filters?.status === 'incomplete') {
+    } else if (filters?.status === 'pending') {
       where.completed = false;
     }
 

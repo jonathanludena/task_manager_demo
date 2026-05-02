@@ -20,37 +20,51 @@ describe('TaskCard', () => {
   };
 
   it('renders task title and description', () => {
-    render(<TaskCard task={incompleteTask} onComplete={vi.fn()} />);
+    render(<TaskCard task={incompleteTask} onToggle={vi.fn()} />);
 
     expect(screen.getByText('Test task')).toBeInTheDocument();
     expect(screen.getByText('Test description')).toBeInTheDocument();
   });
 
-  it('shows complete button for incomplete tasks', () => {
-    render(<TaskCard task={incompleteTask} onComplete={vi.fn()} />);
+  it('shows a toggle switch for incomplete tasks', () => {
+    render(<TaskCard task={incompleteTask} onToggle={vi.fn()} />);
 
-    expect(screen.getByRole('button', { name: /completar/i })).toBeInTheDocument();
+    const toggle = screen.getByRole('switch');
+    expect(toggle).toBeInTheDocument();
+    expect(toggle).toHaveAttribute('aria-checked', 'false');
   });
 
-  it('shows completed badge for completed tasks', () => {
-    render(<TaskCard task={completedTask} onComplete={vi.fn()} />);
+  it('shows checked toggle for completed tasks', () => {
+    render(<TaskCard task={completedTask} onToggle={vi.fn()} />);
 
-    expect(screen.getByText(/completada/i)).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: /completar/i })).not.toBeInTheDocument();
+    const toggle = screen.getByRole('switch');
+    expect(toggle).toBeInTheDocument();
+    expect(toggle).toHaveAttribute('aria-checked', 'true');
   });
 
-  it('calls onComplete when button clicked', async () => {
-    const onComplete = vi.fn();
-    const { user } = render(<TaskCard task={incompleteTask} onComplete={onComplete} />);
+  it('calls onToggle when switch clicked', async () => {
+    const onToggle = vi.fn();
+    const { user } = render(<TaskCard task={incompleteTask} onToggle={onToggle} />);
 
-    await user.click(screen.getByRole('button', { name: /completar/i }));
+    await user.click(screen.getByRole('switch'));
 
-    expect(onComplete).toHaveBeenCalledWith('1');
+    expect(onToggle).toHaveBeenCalledWith('1', true);
   });
 
-  it('displays creation date', () => {
-    render(<TaskCard task={incompleteTask} onComplete={vi.fn()} />);
+  it('calls onToggle with false for completed task', async () => {
+    const onToggle = vi.fn();
+    const { user } = render(<TaskCard task={completedTask} onToggle={onToggle} />);
 
-    expect(screen.getByText(/2026/)).toBeInTheDocument();
+    await user.click(screen.getByRole('switch'));
+
+    expect(onToggle).toHaveBeenCalledWith('2', false);
+  });
+
+  it('shows completed title with line-through style', () => {
+    render(<TaskCard task={completedTask} onToggle={vi.fn()} />);
+
+    const title = screen.getByText('Done task');
+    expect(title).toBeInTheDocument();
+    expect(title.className).toContain('line-through');
   });
 });

@@ -8,22 +8,36 @@ interface TaskDTO {
   createdAt: string;
 }
 
-const tasks: TaskDTO[] = [
-  {
-    id: '1',
-    title: 'Learn TDD',
-    description: 'Write tests first, then code',
-    completed: false,
-    createdAt: '2026-05-01T00:00:00Z',
-  },
-  {
-    id: '2',
-    title: 'Setup CI',
-    description: 'Configure GitHub Actions',
-    completed: true,
-    createdAt: '2026-05-01T00:00:00Z',
-  },
-];
+const STORAGE_KEY = 'msw_tasks';
+
+function getTasks(): TaskDTO[] {
+  if (typeof window !== 'undefined') {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) return JSON.parse(stored);
+  }
+  return [
+    {
+      id: '1',
+      title: 'Learn TDD',
+      description: 'Write tests first, then code',
+      completed: false,
+      createdAt: new Date(Date.now() - 3600000).toISOString(),
+    },
+    {
+      id: '2',
+      title: 'Setup CI',
+      description: 'Configure GitHub Actions',
+      completed: true,
+      createdAt: new Date(Date.now() - 7200000).toISOString(),
+    },
+  ];
+}
+
+function saveTasks(tasks: TaskDTO[]): void {
+  if (typeof window !== 'undefined') {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+  }
+}
 
 export const handlers = [
   http.get('*/tasks', ({ request }) => {
@@ -31,11 +45,11 @@ export const handlers = [
     const status = url.searchParams.get('status');
     const search = url.searchParams.get('search');
 
-    let filtered = tasks;
+    let filtered = getTasks();
 
     if (status === 'completed') {
       filtered = filtered.filter((t) => t.completed);
-    } else if (status === 'incomplete') {
+    } else if (status === 'pending') {
       filtered = filtered.filter((t) => !t.completed);
     }
 
@@ -63,20 +77,32 @@ export const handlers = [
       createdAt: new Date().toISOString(),
     };
 
+    const tasks = getTasks();
     tasks.push(newTask);
+    saveTasks(tasks);
 
     return HttpResponse.json(newTask, { status: 201 });
   }),
 
-  http.patch('*/tasks/:id/complete', ({ params }) => {
-    const task = tasks.find((t) => t.id === params.id);
+  http.patch('*/tasks/:id/complete', async ({ params, request }) => {
+    const tasks = getTasks();
+    const taskIndex = tasks.findIndex((t) => t.id === params.id);
 
-    if (!task) {
+    if (taskIndex === -1) {
       return HttpResponse.json({ error: 'Task not found' }, { status: 404 });
     }
 
-    task.completed = true;
+    let completed = true;
+    try {
+      const body = (await request.json()) as { completed?: boolean };
+      completed = body.completed ?? true;
+    } catch {
+      // no body or invalid JSON — default to complete
+    }
 
-    return HttpResponse.json(task);
+    tasks[taskIndex]!.completed = completed;
+    saveTasks(tasks);
+
+    return HttpResponse.json(tasks[taskIndex]);
   }),
 ];

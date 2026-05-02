@@ -31,7 +31,7 @@ async function request<T>(url: string, options?: RequestInit): Promise<T> {
 }
 
 export interface FetchTasksParams {
-  status?: 'completed' | 'incomplete';
+  status?: 'completed' | 'pending';
   search?: string;
 }
 
@@ -53,9 +53,11 @@ export const taskApi = {
     });
   },
 
-  completeTask(id: string): Promise<TaskDTO> {
+  completeTask(id: string, completed: boolean = true): Promise<TaskDTO> {
     return request<TaskDTO>(`${BASE_URL}/tasks/${id}/complete`, {
       method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ completed }),
     });
   },
 };

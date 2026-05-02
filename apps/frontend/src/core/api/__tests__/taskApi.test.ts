@@ -80,7 +80,11 @@ describe('taskApi', () => {
       const result = await taskApi.completeTask('1');
 
       expect(result).toEqual(completed);
-      expect(fetch).toHaveBeenCalledWith(`${API_URL}/tasks/1/complete`, { method: 'PATCH' });
+      expect(fetch).toHaveBeenCalledWith(`${API_URL}/tasks/1/complete`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ completed: true }),
+      });
     });
 
     it('should throw on error response', async () => {

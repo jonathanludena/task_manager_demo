@@ -16,8 +16,8 @@ export function TaskListPage() {
     setError(null);
 
     try {
-      const params: { status?: 'completed' | 'incomplete'; search?: string } = {};
-      if (statusFilter) params.status = statusFilter as 'completed' | 'incomplete';
+      const params: { status?: 'completed' | 'pending'; search?: string } = {};
+      if (statusFilter) params.status = statusFilter as 'completed' | 'pending';
       if (searchTerm) params.search = searchTerm;
 
       const data = await taskApi.fetchTasks(
@@ -35,12 +35,12 @@ export function TaskListPage() {
     fetchTasks(search, status);
   }, [fetchTasks, search, status]);
 
-  const handleComplete = async (id: string) => {
+  const handleToggle = async (id: string, completed: boolean) => {
     try {
-      const updated = await taskApi.completeTask(id);
+      const updated = await taskApi.completeTask(id, completed);
       setTasks((prev) => prev.map((t) => (t.id === id ? updated : t)));
     } catch {
-      setError('Error al completar la tarea');
+      setError('Error al actualizar la tarea');
     }
   };
 
@@ -68,7 +68,7 @@ export function TaskListPage() {
           Cargando...
         </div>
       ) : (
-        <TaskList tasks={tasks} onComplete={handleComplete} />
+        <TaskList tasks={tasks} onComplete={handleToggle} />
       )}
     </div>
   );

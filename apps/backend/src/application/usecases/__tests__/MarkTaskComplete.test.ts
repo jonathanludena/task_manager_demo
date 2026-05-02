@@ -65,4 +65,24 @@ describe('MarkTaskCompleteUseCase', () => {
       expect.objectContaining({ completed: true }),
     );
   });
+
+  it('should mark a task as incomplete when completed=false', async () => {
+    const completedTask = new Task('abc-123', 'My task', 'Desc', true, new Date('2026-01-01'));
+
+    const mockRepository: TaskRepository = {
+      save: vi.fn().mockImplementation(async (task: Task) => task),
+      findAll: vi.fn(),
+      findById: vi.fn().mockResolvedValue(completedTask),
+    };
+
+    const useCase = new MarkTaskCompleteUseCase(mockRepository);
+
+    const result = await useCase.execute('abc-123', false);
+
+    expect(result).not.toBeNull();
+    expect(result!.completed).toBe(false);
+    expect(mockRepository.save).toHaveBeenCalledWith(
+      expect.objectContaining({ completed: false }),
+    );
+  });
 });

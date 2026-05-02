@@ -21,9 +21,12 @@ describe('TaskList', () => {
     expect(screen.getByText(/no hay tareas/i)).toBeInTheDocument();
   });
 
-  it('shows completed badge for completed tasks', () => {
+  it('renders both incomplete and completed tasks', () => {
     render(<TaskList tasks={tasks} onComplete={vi.fn()} />);
 
-    expect(screen.getByText(/completada/i)).toBeInTheDocument();
+    const switches = screen.getAllByRole('switch');
+    expect(switches).toHaveLength(2);
+    expect(switches[0]).toHaveAttribute('aria-checked', 'false');
+    expect(switches[1]).toHaveAttribute('aria-checked', 'true');
   });
 });

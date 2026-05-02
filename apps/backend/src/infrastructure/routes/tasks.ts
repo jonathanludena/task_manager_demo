@@ -42,7 +42,7 @@ export function buildTaskRoutes(
       Querystring: { status?: string; search?: string };
     }>('/tasks', async (request: FastifyRequest<{ Querystring: { status?: string; search?: string } }>) => {
       const filters = {
-        ...(request.query.status && { status: request.query.status as 'completed' | 'incomplete' }),
+        ...(request.query.status && { status: request.query.status as 'completed' | 'pending' }),
         ...(request.query.search && { search: request.query.search }),
       };
 
@@ -50,13 +50,14 @@ export function buildTaskRoutes(
       return getAllTasks.execute(hasFilters ? filters : undefined);
     });
 
-    server.patch<{ Params: { id: string } }>(
+    server.patch<{ Params: { id: string }; Body: { completed?: boolean } }>(
       '/tasks/:id/complete',
       async (
-        request: FastifyRequest<{ Params: { id: string } }>,
+        request: FastifyRequest<{ Params: { id: string }; Body: { completed?: boolean } }>,
         reply: FastifyReply,
       ) => {
-        const task = await markTaskComplete.execute(request.params.id);
+        const completed = request.body?.completed ?? true;
+        const task = await markTaskComplete.execute(request.params.id, completed);
 
         if (!task) {
           return reply.status(404).send({ error: 'Task not found' });
