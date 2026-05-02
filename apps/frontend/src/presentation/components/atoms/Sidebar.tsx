@@ -1,13 +1,14 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { TaskPieChart } from './TaskPieChart';
 import { WorkHoursClock } from './WorkHoursClock';
+import { onTasksUpdated } from '@/lib/taskEvents';
 
 export function Sidebar() {
   const location = useLocation();
   const [stats, setStats] = useState({ completed: 0, pending: 0 });
 
-  useEffect(() => {
+  const fetchStats = useCallback(() => {
     const API = (import.meta as any).env?.VITE_API_URL || 'http://localhost:3000';
     fetch(`${API}/tasks`)
       .then((r) => r.json())
@@ -17,7 +18,16 @@ export function Sidebar() {
         setStats({ completed, pending });
       })
       .catch(() => {});
-  }, [location.pathname]);
+  }, []);
+
+  useEffect(() => {
+    fetchStats();
+  }, [fetchStats, location.pathname]);
+
+  // Reactivo: escucha cambios en las tareas
+  useEffect(() => {
+    return onTasksUpdated(fetchStats);
+  }, [fetchStats]);
 
   const navItems = [
     { to: '/', label: 'Tareas', icon: '📋' },
@@ -40,7 +50,7 @@ export function Sidebar() {
             <Link
               key={item.to}
               to={item.to}
-              className={`rounded-md px-3 py-2 text-sm font-medium transition-colors ${
+              className={`cursor-pointer rounded-md px-3 py-2 text-sm font-medium transition-colors ${
                 isActive
                   ? 'bg-gray-100 text-gray-900 dark:bg-gray-800 dark:text-white'
                   : 'text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800'

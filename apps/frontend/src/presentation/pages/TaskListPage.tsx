@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { TaskList } from '@/presentation/components/organisms/TaskList';
 import { TaskFilters } from '@/presentation/components/molecules/TaskFilters';
 import { taskApi } from '@/core/api/taskApi';
+import { notifyTasksUpdated } from '@/lib/taskEvents';
 import type { TaskDTO } from '@/core/api/taskApi';
 
 export function TaskListPage() {
@@ -39,6 +40,7 @@ export function TaskListPage() {
     try {
       const updated = await taskApi.completeTask(id, completed);
       setTasks((prev) => prev.map((t) => (t.id === id ? updated : t)));
+      notifyTasksUpdated();
     } catch {
       setError('Error al actualizar la tarea');
     }

@@ -36,7 +36,7 @@ export function TaskFilters({ search, status, onSearchChange, onStatusChange }: 
           <button
             key={opt.value}
             onClick={() => onStatusChange(opt.value)}
-            className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
+            className={`cursor-pointer rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
               status === opt.value
                 ? 'bg-blue-600 text-white'
                 : 'text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700'

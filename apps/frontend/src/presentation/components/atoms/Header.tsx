@@ -19,7 +19,7 @@ export function Header() {
 
           <button
             onClick={toggleTheme}
-            className="rounded-md p-2 text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
+            className="cursor-pointer rounded-md p-2 text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800"
             aria-label="Cambiar tema"
           >
             {theme === 'light' ? (

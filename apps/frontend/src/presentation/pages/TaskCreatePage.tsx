@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { TaskForm } from '@/presentation/components/organisms/TaskForm';
 import { taskApi } from '@/core/api/taskApi';
+import { notifyTasksUpdated } from '@/lib/taskEvents';
 
 export function TaskCreatePage() {
   const navigate = useNavigate();
@@ -14,6 +15,7 @@ export function TaskCreatePage() {
 
     try {
       await taskApi.createTask(data);
+      notifyTasksUpdated();
       navigate('/');
     } catch {
       setError('Error al crear la tarea');

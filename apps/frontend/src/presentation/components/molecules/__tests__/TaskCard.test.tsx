@@ -67,4 +67,16 @@ describe('TaskCard', () => {
     expect(title).toBeInTheDocument();
     expect(title.className).toContain('line-through');
   });
+
+  it('shows "Pendiente" badge for incomplete tasks', () => {
+    render(<TaskCard task={incompleteTask} onToggle={vi.fn()} />);
+
+    expect(screen.getByText('Pendiente')).toBeInTheDocument();
+  });
+
+  it('shows "Completada" badge for completed tasks', () => {
+    render(<TaskCard task={completedTask} onToggle={vi.fn()} />);
+
+    expect(screen.getByText('Completada')).toBeInTheDocument();
+  });
 });

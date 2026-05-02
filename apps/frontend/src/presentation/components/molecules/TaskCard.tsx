@@ -39,6 +39,19 @@ export function TaskCard({ task, onToggle }: TaskCardProps) {
             {formatRelativeTime(task.createdAt)}
           </p>
         </div>
+
+        {/* Status badge */}
+        <div className="shrink-0 pt-0.5">
+          {task.completed ? (
+            <span className="inline-block rounded-full bg-green-100 px-2.5 py-0.5 text-[11px] font-medium text-green-700 dark:bg-green-900/30 dark:text-green-400">
+              Completada
+            </span>
+          ) : (
+            <span className="inline-block rounded-full bg-amber-100 px-2.5 py-0.5 text-[11px] font-medium text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+              Pendiente
+            </span>
+          )}
+        </div>
       </div>
     </div>
   );
