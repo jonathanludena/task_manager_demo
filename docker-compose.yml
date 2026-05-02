@@ -3,8 +3,9 @@ services:
     build:
       context: .
       dockerfile: apps/frontend/Dockerfile
-      args:
-        VITE_API_URL: http://localhost:3000
+      # VITE_API_URL vacío → URLs relativas → nginx proxy reverso
+    environment:
+      API_HOST: backend
     ports:
       - "80:80"
     depends_on:
