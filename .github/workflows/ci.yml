@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [main]
 
+env:
+  VITE_API_URL: http://localhost:3000
+
 jobs:
   lint:
     runs-on: ubuntu-latest
@@ -49,3 +52,31 @@ jobs:
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
       - run: pnpm -r test
+
+  test-e2e:
+    runs-on: ubuntu-latest
+    needs: [lint, typecheck]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - name: Install Playwright browsers
+        run: npx playwright install chromium
+        working-directory: apps/frontend
+      - name: Install system deps
+        run: npx playwright install-deps chromium
+        working-directory: apps/frontend
+      - name: Run E2E tests
+        run: pnpm test:e2e
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: apps/frontend/playwright-report/
+          retention-days: 7
