@@ -47,31 +47,38 @@ export function TaskListPage() {
   };
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-8">
-      <h1 className="mb-6 text-2xl font-bold text-gray-900 dark:text-white">
+    <div className="mx-auto max-w-2xl px-4">
+      {/* Heading: se pierde al scrollear (normal flow) */}
+      <h1 className="py-8 pb-4 text-2xl font-bold text-gray-900 dark:text-white">
         Mis Tareas
       </h1>
 
-      <TaskFilters
-        search={search}
-        status={status}
-        onSearchChange={setSearch}
-        onStatusChange={setStatus}
-      />
+      {/* Filtros: siempre visibles al scrollear */}
+      <div className="sticky top-0 z-10 bg-gray-50 pb-4 pt-0 dark:bg-gray-950">
+        <TaskFilters
+          search={search}
+          status={status}
+          onSearchChange={setSearch}
+          onStatusChange={setStatus}
+        />
+      </div>
 
-      {error && (
-        <div className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-600 dark:bg-red-900/30 dark:text-red-400">
-          {error}
-        </div>
-      )}
+      {/* Cards: scrollean normalmente */}
+      <div className="pb-8">
+        {error && (
+          <div className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-600 dark:bg-red-900/30 dark:text-red-400">
+            {error}
+          </div>
+        )}
 
-      {loading ? (
-        <div className="py-12 text-center text-gray-500 dark:text-gray-400">
-          Cargando...
-        </div>
-      ) : (
-        <TaskList tasks={tasks} onComplete={handleToggle} />
-      )}
+        {loading ? (
+          <div className="py-12 text-center text-gray-500 dark:text-gray-400">
+            Cargando...
+          </div>
+        ) : (
+          <TaskList tasks={tasks} onComplete={handleToggle} />
+        )}
+      </div>
     </div>
   );
 }
