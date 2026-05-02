@@ -1,6 +1,6 @@
-import type { DataSource } from 'typeorm';
+import { type DataSource, ILike } from 'typeorm';
 import { Task } from '../../domain/entities/Task';
-import type { TaskRepository } from '../../domain/repositories/TaskRepository';
+import type { TaskRepository, TaskFilters } from '../../domain/repositories/TaskRepository';
 
 export class TypeOrmTaskRepository implements TaskRepository {
   constructor(private readonly dataSource: DataSource) {}
@@ -9,8 +9,20 @@ export class TypeOrmTaskRepository implements TaskRepository {
     return this.dataSource.manager.save(Task, task);
   }
 
-  async findAll(): Promise<Task[]> {
-    return this.dataSource.manager.find(Task);
+  async findAll(filters?: TaskFilters): Promise<Task[]> {
+    const where: Record<string, unknown> = {};
+
+    if (filters?.status === 'completed') {
+      where.completed = true;
+    } else if (filters?.status === 'incomplete') {
+      where.completed = false;
+    }
+
+    if (filters?.search) {
+      where.title = ILike(`%${filters.search}%`);
+    }
+
+    return this.dataSource.manager.find(Task, { where });
   }
 
   async findById(id: string): Promise<Task | null> {

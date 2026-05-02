@@ -26,8 +26,26 @@ const tasks: TaskDTO[] = [
 ];
 
 export const handlers = [
-  http.get('*/tasks', () => {
-    return HttpResponse.json(tasks);
+  http.get('*/tasks', ({ request }) => {
+    const url = new URL(request.url);
+    const status = url.searchParams.get('status');
+    const search = url.searchParams.get('search');
+
+    let filtered = tasks;
+
+    if (status === 'completed') {
+      filtered = filtered.filter((t) => t.completed);
+    } else if (status === 'incomplete') {
+      filtered = filtered.filter((t) => !t.completed);
+    }
+
+    if (search) {
+      filtered = filtered.filter((t) =>
+        t.title.toLowerCase().includes(search.toLowerCase()),
+      );
+    }
+
+    return HttpResponse.json(filtered);
   }),
 
   http.post('*/tasks', async ({ request }) => {

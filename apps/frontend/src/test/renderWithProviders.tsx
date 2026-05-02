@@ -1,11 +1,16 @@
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
+import { ThemeProvider } from '@/presentation/components/atoms/ThemeProvider';
 import type { RenderOptions, RenderResult } from '@testing-library/react';
 import type { ReactElement } from 'react';
 
 function AllTheProviders({ children }: { children: React.ReactNode }) {
-  return <MemoryRouter>{children}</MemoryRouter>;
+  return (
+    <ThemeProvider>
+      <MemoryRouter>{children}</MemoryRouter>
+    </ThemeProvider>
+  );
 }
 
 interface CustomRenderResult extends RenderResult {

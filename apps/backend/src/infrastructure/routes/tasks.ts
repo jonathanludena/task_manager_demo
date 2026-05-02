@@ -38,8 +38,16 @@ export function buildTaskRoutes(
       },
     );
 
-    server.get('/tasks', async () => {
-      return getAllTasks.execute();
+    server.get<{
+      Querystring: { status?: string; search?: string };
+    }>('/tasks', async (request: FastifyRequest<{ Querystring: { status?: string; search?: string } }>) => {
+      const filters = {
+        ...(request.query.status && { status: request.query.status as 'completed' | 'incomplete' }),
+        ...(request.query.search && { search: request.query.search }),
+      };
+
+      const hasFilters = Object.keys(filters).length > 0;
+      return getAllTasks.execute(hasFilters ? filters : undefined);
     });
 
     server.patch<{ Params: { id: string } }>(

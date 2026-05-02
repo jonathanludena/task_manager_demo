@@ -19,11 +19,11 @@ describe('TaskListPage', () => {
     expect(screen.getByText('Setup CI')).toBeInTheDocument();
   });
 
-  it('shows navigate to create button', async () => {
+  it('shows the search input', async () => {
     render(<TaskListPage />);
 
     await waitFor(() => {
-      expect(screen.getByRole('link', { name: /nueva tarea/i })).toBeInTheDocument();
+      expect(screen.getByPlaceholderText(/buscar/i)).toBeInTheDocument();
     });
   });
 });

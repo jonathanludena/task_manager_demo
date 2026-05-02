@@ -30,9 +30,19 @@ async function request<T>(url: string, options?: RequestInit): Promise<T> {
   return response.json() as Promise<T>;
 }
 
+export interface FetchTasksParams {
+  status?: 'completed' | 'incomplete';
+  search?: string;
+}
+
 export const taskApi = {
-  fetchTasks(): Promise<TaskDTO[]> {
-    return request<TaskDTO[]>(`${BASE_URL}/tasks`);
+  fetchTasks(params?: FetchTasksParams): Promise<TaskDTO[]> {
+    const query = new URLSearchParams();
+    if (params?.status) query.set('status', params.status);
+    if (params?.search) query.set('search', params.search);
+    const qs = query.toString();
+    const url = `${BASE_URL}/tasks${qs ? `?${qs}` : ''}`;
+    return request<TaskDTO[]>(url);
   },
 
   createTask(payload: CreateTaskPayload): Promise<TaskDTO> {

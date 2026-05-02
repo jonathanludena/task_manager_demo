@@ -18,13 +18,13 @@ test.describe('Task Management - E2E Flows', () => {
       await expect(newTaskLink).toBeVisible();
     });
 
-    test('debe navegar a la página de creación al hacer click en Nueva Tarea', async ({ page }) => {
+    test('debe navegar a la página de creación desde el botón del header', async ({ page }) => {
       await page.goto('/');
 
-      await page.getByRole('link', { name: /nueva tarea/i }).click();
+      await page.getByRole('link', { name: /nueva tarea/i }).first().click();
 
       await expect(page).toHaveURL('/create');
-      await expect(page.getByText('Nueva Tarea')).toBeVisible();
+      await expect(page.getByRole('heading', { name: 'Nueva Tarea' })).toBeVisible();
     });
 
     test('debe mostrar tarea completada con badge', async ({ page }) => {
@@ -82,8 +82,8 @@ test.describe('Task Management - E2E Flows', () => {
       await page.goto('/');
       await expect(page.getByText('Learn TDD')).toBeVisible({ timeout: 10000 });
 
-      // 2. Ir a crear
-      await page.getByRole('link', { name: /nueva tarea/i }).click();
+      // 2. Ir a crear (botón en el header)
+      await page.getByRole('link', { name: /nueva tarea/i }).first().click();
       await expect(page).toHaveURL('/create');
 
       // 3. Crear tarea
