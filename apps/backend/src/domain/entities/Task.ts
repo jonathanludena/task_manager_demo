@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
 
 @Entity('tasks')
@@ -5,16 +6,16 @@ export class Task {
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
-  @Column()
+  @Column('text')
   title!: string;
 
-  @Column({ default: '' })
+  @Column('text', { default: '' })
   description!: string;
 
-  @Column({ default: false })
+  @Column('boolean', { default: false })
   completed!: boolean;
 
-  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  @Column('timestamp', { default: () => 'CURRENT_TIMESTAMP' })
   createdAt!: Date;
 
   constructor(
