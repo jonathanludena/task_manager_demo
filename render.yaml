@@ -1,0 +1,69 @@
+# ── Render Blueprint ─────────────────────────────────────────
+# Define los servicios de producción: frontend (nginx + proxy),
+# backend (Fastify) y base de datos (PostgreSQL).
+#
+# Ver: https://render.com/docs/blueprint-spec
+#
+# Uso:
+#   1. Conectá el repo a Render Dashboard
+#   2. Render detecta este archivo y crea los servicios
+#   3. En cada push a main, Render redeploya automáticamente
+
+services:
+  # ── Frontend ──────────────────────────────────────────────
+  # Sirve el build de Vite con nginx.
+  # El nginx.conf hace proxy reverso de /tasks y /health hacia el backend.
+  # VITE_API_URL se deja vacío para que el frontend use URLs relativas
+  # y el proxy de nginx las redirija al backend internamente.
+  # API_HOST define el hostname interno del backend en la red de Render.
+  - type: web
+    name: task-manager-frontend
+    runtime: docker
+    repo: https://github.com/jonathanludena/task_manager_demo
+    dockerfilePath: ./apps/frontend/Dockerfile
+    dockerContext: .
+    plan: free
+    envVars:
+      - key: API_HOST
+        value: task-manager-api
+
+  # ── Backend ───────────────────────────────────────────────
+  # API REST con Fastify + TypeORM. Se conecta a la DB gestionada.
+  - type: web
+    name: task-manager-api
+    runtime: docker
+    repo: https://github.com/jonathanludena/task_manager_demo
+    dockerfilePath: ./apps/backend/Dockerfile
+    dockerContext: .
+    plan: free
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: DB_HOST
+        fromDatabase:
+          name: task-manager-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: task-manager-db
+          property: port
+      - key: DB_USER
+        fromDatabase:
+          name: task-manager-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: task-manager-db
+          property: password
+      - key: DB_NAME
+        fromDatabase:
+          name: task-manager-db
+          property: database
+
+databases:
+  - name: task-manager-db
+    plan: free
+    databaseName: task_manager
+    region: ohio
