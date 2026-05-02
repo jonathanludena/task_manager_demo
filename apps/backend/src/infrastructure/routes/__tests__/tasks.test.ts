@@ -110,6 +110,42 @@ describe('Task routes', () => {
       expect(body[1]!.title).toBe('Task 2');
       await server.close();
     });
+
+    it('should filter by status query param', async () => {
+      const findAll = vi.fn().mockResolvedValue([]);
+
+      server = buildTestServer({
+        save: vi.fn(),
+        findAll,
+        findById: vi.fn(),
+      });
+
+      await server.inject({
+        method: 'GET',
+        url: '/tasks?status=completed',
+      });
+
+      expect(findAll).toHaveBeenCalledWith({ status: 'completed' });
+      await server.close();
+    });
+
+    it('should filter by search query param', async () => {
+      const findAll = vi.fn().mockResolvedValue([]);
+
+      server = buildTestServer({
+        save: vi.fn(),
+        findAll,
+        findById: vi.fn(),
+      });
+
+      await server.inject({
+        method: 'GET',
+        url: '/tasks?search=test',
+      });
+
+      expect(findAll).toHaveBeenCalledWith({ search: 'test' });
+      await server.close();
+    });
   });
 
   describe('PATCH /tasks/:id/complete', () => {
