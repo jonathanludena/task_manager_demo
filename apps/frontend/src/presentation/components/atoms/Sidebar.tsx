@@ -2,32 +2,37 @@ import { useEffect, useState, useCallback } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { TaskPieChart } from './TaskPieChart';
 import { WorkHoursClock } from './WorkHoursClock';
+import { taskApi } from '@/core/api/taskApi';
 import { onTasksUpdated } from '@/lib/taskEvents';
 
 export function Sidebar() {
   const location = useLocation();
   const [stats, setStats] = useState({ completed: 0, pending: 0 });
 
-  const fetchStats = useCallback(() => {
-    const API = (import.meta as any).env?.VITE_API_URL || 'http://localhost:3000';
-    fetch(`${API}/tasks`)
-      .then((r) => r.json())
-      .then((tasks: { completed: boolean }[]) => {
-        const completed = tasks.filter((t) => t.completed).length;
-        const pending = tasks.length - completed;
-        setStats({ completed, pending });
-      })
-      .catch(() => {});
+  const fetchStats = useCallback(async () => {
+    try {
+      const tasks = await taskApi.fetchTasks();
+      const completed = tasks.filter((t) => t.completed).length;
+      const pending = tasks.length - completed;
+      setStats({ completed, pending });
+    } catch {
+      // Silently ignore sidebar fetch errors
+    }
   }, []);
 
+  /* eslint-disable react-hooks/set-state-in-effect --
+   * Carga inicial de estadísticas y reactividad al cambiar de ruta.
+   * El async handler es llamado desde useEffect, pero no causa cascada
+   * porque los updates son controlados por dependencias explícitas. */
   useEffect(() => {
     fetchStats();
   }, [fetchStats, location.pathname]);
 
-  // Reactivo: escucha cambios en las tareas
+  // Reactivo: escucha cambios en las tareas (creación, toggle)
   useEffect(() => {
     return onTasksUpdated(fetchStats);
   }, [fetchStats]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const navItems = [
     { to: '/', label: 'Tareas', icon: '📋' },

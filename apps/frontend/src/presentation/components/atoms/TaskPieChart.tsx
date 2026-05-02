@@ -13,7 +13,7 @@ export function TaskPieChart({ completed, pending }: TaskPieChartProps) {
     );
   }
 
-  const pct = total > 0 ? (completed / total) * 100 : 0;
+  const pct = (completed / total) * 100;
   const r = 36;
   const circ = 2 * Math.PI * r;
   const fillPct = Math.min(pct, 100);

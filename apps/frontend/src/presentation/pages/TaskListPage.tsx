@@ -4,6 +4,7 @@ import { TaskFilters } from '@/presentation/components/molecules/TaskFilters';
 import { taskApi } from '@/core/api/taskApi';
 import { notifyTasksUpdated } from '@/lib/taskEvents';
 import type { TaskDTO } from '@/core/api/taskApi';
+import type { TaskFilters as TaskFiltersParams } from '@task-manager/shared';
 
 export function TaskListPage() {
   const [tasks, setTasks] = useState<TaskDTO[]>([]);
@@ -17,7 +18,7 @@ export function TaskListPage() {
     setError(null);
 
     try {
-      const params: { status?: 'completed' | 'pending'; search?: string } = {};
+      const params: TaskFiltersParams = {};
       if (statusFilter) params.status = statusFilter as 'completed' | 'pending';
       if (searchTerm) params.search = searchTerm;
 
@@ -32,9 +33,28 @@ export function TaskListPage() {
     }
   }, []);
 
+  /* eslint-disable react-hooks/set-state-in-effect --
+   * La carga inicial requiere fetch dentro de useEffect. El async handler
+   * settea estado (loading/tasks/error) pero no hay cascada porque solo
+   * se ejecuta UNA vez al montar. Los cambios de filtro gatillan fetch
+   * desde los handlers onChange, no desde efectos. */
   useEffect(() => {
-    fetchTasks(search, status);
-  }, [fetchTasks, search, status]);
+    fetchTasks('', '');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  /* eslint-enable react-hooks/set-state-in-effect */
+
+  // Los filtros gatillan fetch directamente desde los handlers
+  // para evitar setState sincrónico dentro de efectos (React 19)
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+    fetchTasks(value, status);
+  };
+
+  const handleStatusChange = (value: string) => {
+    setStatus(value);
+    fetchTasks(search, value);
+  };
 
   const handleToggle = async (id: string, completed: boolean) => {
     try {
@@ -58,8 +78,8 @@ export function TaskListPage() {
         <TaskFilters
           search={search}
           status={status}
-          onSearchChange={setSearch}
-          onStatusChange={setStatus}
+          onSearchChange={handleSearchChange}
+          onStatusChange={handleStatusChange}
         />
       </div>
 
