@@ -8,6 +8,8 @@ RUN pnpm install --frozen-lockfile
 COPY apps/backend/ ./apps/backend/
 COPY packages/shared/ ./packages/shared/
 RUN pnpm --filter @task-manager/backend build
+# Flatten pnpm symlinks so Docker COPY captures actual files (reflect-metadata, etc.)
+RUN cp -rL node_modules /tmp/node_modules && rm -rf node_modules && mv /tmp/node_modules node_modules
 
 FROM node:20-alpine AS runner
 WORKDIR /app
