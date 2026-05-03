@@ -8,6 +8,7 @@ COPY apps/frontend/package.json ./apps/frontend/
 COPY packages/shared/package.json ./packages/shared/
 RUN pnpm install --frozen-lockfile
 COPY apps/frontend/ ./apps/frontend/
+COPY packages/shared/ ./packages/shared/
 RUN pnpm --filter @task-manager/frontend build
 
 FROM nginx:alpine AS runner
