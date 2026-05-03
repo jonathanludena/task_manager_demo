@@ -224,16 +224,14 @@ STAGING=true bash deploy.sh
 STAGING=false bash deploy.sh
 ```
 
-> 📖 Ver [`DEPLOY.md`](./DEPLOY.md) para guía completa de despliegue en VPS Hostinger.
-
 ### Producción — VPS Hostinger
 
 La aplicación está desplegada en un **VPS Hostinger** con Ubuntu, accesible vía:
 
 | Servicio   | URL                                          |
 | :--------- | :------------------------------------------- |
-| **Frontend** | https://app-challenge-0526.lproconsulting.com |
-| **Backend**  | https://api-challenge-0526.lproconsulting.com |
+| **Frontend** | [`https://app-challenge-0526.lproconsulting.com`](https://app-challenge-0526.lproconsulting.com) |
+| **Backend**  | [`https://api-challenge-0526.lproconsulting.com`](https://api-challenge-0526.lproconsulting.com) |
 
 #### Infraestructura del deploy
 
