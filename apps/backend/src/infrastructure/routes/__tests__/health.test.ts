@@ -23,4 +23,16 @@ describe('Health route', () => {
     expect(response.statusCode).toBe(200);
     expect(response.json()).toEqual({ status: 'ok' });
   });
+
+  it('GET /health should include CORS headers when Origin header present', async () => {
+    const response = await server.inject({
+      method: 'GET',
+      url: '/health',
+      headers: { origin: 'https://app-challenge-0526.lproconsulting.com' },
+    });
+
+    expect(response.statusCode).toBe(200);
+    // After securityPlugin is registered, CORS headers should be present
+    expect(response.headers['access-control-allow-origin']).toBe('https://app-challenge-0526.lproconsulting.com');
+  });
 });

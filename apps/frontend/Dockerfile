@@ -16,5 +16,7 @@ HEALTHCHECK --interval=15s --timeout=5s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:80/ || exit 1
 EXPOSE 80
 CMD API_HOST="${API_HOST:-backend}" && \
-    sed -i "s/__API_HOST__/$API_HOST/g" /etc/nginx/conf.d/default.conf && \
+    INTERNAL_SECRET="${INTERNAL_SECRET:-}" && \
+    sed -i "s/__API_HOST__/$API_HOST/g; s/__INTERNAL_SECRET__/$INTERNAL_SECRET/g" \
+    /etc/nginx/conf.d/default.conf && \
     nginx -g 'daemon off;'
