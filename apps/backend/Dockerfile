@@ -9,7 +9,7 @@ COPY apps/backend/ ./apps/backend/
 COPY packages/shared/ ./packages/shared/
 RUN pnpm --filter @task-manager/backend build
 # pnpm deploy creates a flat node_modules (no symlinks) ideal for Docker
-RUN pnpm deploy --filter @task-manager/backend /tmp/deploy
+RUN pnpm deploy --filter @task-manager/backend /tmp/deploy --legacy
 
 FROM node:20-alpine AS runner
 WORKDIR /app
