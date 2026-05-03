@@ -48,6 +48,13 @@ if [ ! -f "./certbot/conf/live/app-challenge-0526.lproconsulting.com/fullchain.p
     SELF_SIGNED=true
 fi
 
+# ── Stop existing containers & cleanup ──────────────────
+# Evita conflictos de puertos con contenedores de deploys
+# fallidos anteriores (port 80/443 ocupados por versión vieja).
+echo "→ Stopping existing containers..."
+docker compose down 2>/dev/null || true
+docker system prune -f 2>/dev/null || true
+
 # ── Pull or Build Images ─────────────────────────────────
 # If CI provided image tags (FRONTEND_IMAGE, BACKEND_IMAGE),
 # pull them from GHCR. Otherwise build from source locally.

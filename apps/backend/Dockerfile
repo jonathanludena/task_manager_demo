@@ -12,6 +12,7 @@ RUN pnpm --filter @task-manager/backend build
 RUN cp -rL node_modules /tmp/node_modules && rm -rf node_modules && mv /tmp/node_modules node_modules
 
 FROM node:20-alpine AS runner
+RUN corepack enable && corepack prepare pnpm@10
 WORKDIR /app
 COPY --from=builder /app/apps/backend/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules
