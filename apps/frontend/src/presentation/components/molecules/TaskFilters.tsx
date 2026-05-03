@@ -30,7 +30,7 @@ export function TaskFilters({ search, status, onSearchChange, onStatusChange }: 
       <div className="flex gap-1 rounded-lg border border-gray-300 bg-white p-1 dark:border-gray-600 dark:bg-gray-800">
         {[
           { value: '', label: 'Todas' },
-          { value: 'incomplete', label: 'Pendientes' },
+          { value: 'pending', label: 'Pendientes' },
           { value: 'completed', label: 'Completadas' },
         ].map((opt) => (
           <button
