@@ -7,6 +7,10 @@ on:
     branches: [main]
 
 env:
+  # VITE_API_URL es necesaria para los tests de taskApi que mockean fetch.
+  # Los módulos se importan antes de que vi.stubEnv pueda ejecutarse,
+  # por lo que la variable debe estar disponible desde el inicio.
+  VITE_API_URL: http://localhost:3000
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
