@@ -1,4 +1,3 @@
-import path from 'path';
 import { DataSource } from 'typeorm';
 import { env } from '../config/env';
 import { Task } from '../../domain/entities/Task';
@@ -11,7 +10,10 @@ export const AppDataSource = new DataSource({
   password: env.DB_PASSWORD,
   database: env.DB_NAME,
   entities: [Task],
-  migrations: [path.join(__dirname, 'migrations', '*.{ts,js}')],
+  // Dev (tsx): busca .ts en src/. Prod (compilado): busca .js en dist/.
+  migrations: env.NODE_ENV.startsWith('prod')
+    ? ['dist/infrastructure/database/migrations/*.js']
+    : ['src/infrastructure/database/migrations/*.ts'],
   migrationsRun: env.NODE_ENV.startsWith('prod'),
   synchronize: !env.NODE_ENV.startsWith('prod'),
   logging: false,
