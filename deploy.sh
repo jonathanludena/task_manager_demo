@@ -21,6 +21,12 @@
 
 set -e
 
+# Cargar variables de .env (no sobreescribe vars ya definidas como STAGING desde CI)
+if [ -f .env ]; then
+  # shellcheck disable=SC1091
+  . ./.env
+fi
+
 echo "→ Pulling latest changes..."
 git pull origin main
 
