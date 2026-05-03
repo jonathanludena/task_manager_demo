@@ -5,6 +5,7 @@ WORKDIR /app
 RUN corepack enable && corepack prepare pnpm@10
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json tsconfig.base.json ./
 COPY apps/frontend/package.json ./apps/frontend/
+COPY packages/shared/package.json ./packages/shared/
 RUN pnpm install --frozen-lockfile
 COPY apps/frontend/ ./apps/frontend/
 RUN pnpm --filter @task-manager/frontend build
