@@ -11,6 +11,7 @@ describe('MarkTaskCompleteUseCase', () => {
       save: vi.fn().mockImplementation(async (task: Task) => task),
       findAll: vi.fn(),
       findById: vi.fn().mockResolvedValue(existingTask),
+      delete: vi.fn(),
     };
 
     const useCase = new MarkTaskCompleteUseCase(mockRepository);
@@ -35,6 +36,7 @@ describe('MarkTaskCompleteUseCase', () => {
       save: vi.fn(),
       findAll: vi.fn(),
       findById: vi.fn().mockResolvedValue(null),
+      delete: vi.fn(),
     };
 
     const useCase = new MarkTaskCompleteUseCase(mockRepository);
@@ -53,6 +55,7 @@ describe('MarkTaskCompleteUseCase', () => {
       save: vi.fn().mockImplementation(async (task: Task) => task),
       findAll: vi.fn(),
       findById: vi.fn().mockResolvedValue(completedTask),
+      delete: vi.fn(),
     };
 
     const useCase = new MarkTaskCompleteUseCase(mockRepository);
@@ -73,6 +76,7 @@ describe('MarkTaskCompleteUseCase', () => {
       save: vi.fn().mockImplementation(async (task: Task) => task),
       findAll: vi.fn(),
       findById: vi.fn().mockResolvedValue(completedTask),
+      delete: vi.fn(),
     };
 
     const useCase = new MarkTaskCompleteUseCase(mockRepository);

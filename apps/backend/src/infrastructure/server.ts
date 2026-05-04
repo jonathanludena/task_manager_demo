@@ -5,6 +5,7 @@ import { buildTaskRoutes } from './routes/tasks';
 import { CreateTaskUseCase } from '../application/usecases/CreateTask';
 import { GetAllTasksUseCase } from '../application/usecases/GetAllTasks';
 import { MarkTaskCompleteUseCase } from '../application/usecases/MarkTaskComplete';
+import { DeleteTaskUseCase } from '../application/usecases/DeleteTask';
 import type { TaskRepository } from '../domain/repositories/TaskRepository';
 import { TypeOrmTaskRepository } from './repositories/TypeOrmTaskRepository';
 import { AppDataSource } from './database/dataSource';
@@ -13,6 +14,7 @@ export interface ServerDeps {
   createTask?: CreateTaskUseCase;
   getAllTasks?: GetAllTasksUseCase;
   markTaskComplete?: MarkTaskCompleteUseCase;
+  deleteTask?: DeleteTaskUseCase;
 }
 
 export function buildServer(deps?: ServerDeps) {
@@ -28,6 +30,7 @@ export function buildServer(deps?: ServerDeps) {
       deps?.createTask ?? new CreateTaskUseCase(repo),
       deps?.getAllTasks ?? new GetAllTasksUseCase(repo),
       deps?.markTaskComplete ?? new MarkTaskCompleteUseCase(repo),
+      deps?.deleteTask ?? new DeleteTaskUseCase(repo),
     ),
   );
 

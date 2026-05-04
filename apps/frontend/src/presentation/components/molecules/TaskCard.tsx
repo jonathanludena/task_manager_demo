@@ -1,3 +1,4 @@
+import { Trash2 } from 'lucide-react';
 import { TaskCardToggle } from '@/presentation/components/atoms/TaskCardToggle';
 import { formatRelativeTime } from '@/lib/formatRelativeTime';
 import type { TaskDTO } from '@/core/api/taskApi';
@@ -5,9 +6,10 @@ import type { TaskDTO } from '@/core/api/taskApi';
 interface TaskCardProps {
   task: TaskDTO;
   onToggle: (id: string, completed: boolean) => void;
+  onDelete?: (id: string) => void;
 }
 
-export function TaskCard({ task, onToggle }: TaskCardProps) {
+export function TaskCard({ task, onToggle, onDelete }: TaskCardProps) {
   return (
     <div className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition-colors dark:border-gray-700 dark:bg-gray-900">
       <div className="flex items-start gap-3">
@@ -52,6 +54,20 @@ export function TaskCard({ task, onToggle }: TaskCardProps) {
             </span>
           )}
         </div>
+
+        {/* Delete button */}
+        {onDelete && (
+          <div className="shrink-0 pt-0.5">
+            <button
+              type="button"
+              onClick={() => onDelete(task.id)}
+              aria-label={`Eliminar ${task.title}`}
+              className="rounded-md p-1 text-gray-400 transition-colors hover:bg-red-100 hover:text-red-600 dark:hover:bg-red-900/30 dark:hover:text-red-400"
+            >
+              <Trash2 className="size-4" />
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

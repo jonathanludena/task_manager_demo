@@ -84,6 +84,20 @@ export const handlers = [
     return HttpResponse.json(newTask, { status: 201 });
   }),
 
+  http.delete('*/tasks/:id', async ({ params }) => {
+    const tasks = getTasks();
+    const index = tasks.findIndex((t) => t.id === params.id);
+
+    if (index === -1) {
+      return new HttpResponse(null, { status: 404 });
+    }
+
+    tasks.splice(index, 1);
+    saveTasks(tasks);
+
+    return new HttpResponse(null, { status: 204 });
+  }),
+
   http.patch('*/tasks/:id/complete', async ({ params, request }) => {
     const tasks = getTasks();
     const taskIndex = tasks.findIndex((t) => t.id === params.id);

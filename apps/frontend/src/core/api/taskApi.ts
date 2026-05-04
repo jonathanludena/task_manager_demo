@@ -21,6 +21,17 @@ async function request<T>(url: string, options?: RequestInit): Promise<T> {
   return response.json() as Promise<T>;
 }
 
+async function requestVoid(url: string, options?: RequestInit): Promise<void> {
+  const response = await fetch(url, options);
+
+  if (!response.ok) {
+    const action = options?.method === 'DELETE'
+      ? 'delete task'
+      : 'process request';
+    throw new Error(`Failed to ${action}`);
+  }
+}
+
 export const taskApi = {
   fetchTasks(params?: TaskFilters): Promise<TaskDTO[]> {
     const query = new URLSearchParams();
@@ -44,6 +55,12 @@ export const taskApi = {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ completed }),
+    });
+  },
+
+  deleteTask(id: string): Promise<void> {
+    return requestVoid(`${BASE_URL}/tasks/${id}`, {
+      method: 'DELETE',
     });
   },
 };

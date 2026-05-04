@@ -4,10 +4,11 @@ import { Task } from '../../../domain/entities/Task';
 import { CreateTaskUseCase } from '../../../application/usecases/CreateTask';
 import { GetAllTasksUseCase } from '../../../application/usecases/GetAllTasks';
 import { MarkTaskCompleteUseCase } from '../../../application/usecases/MarkTaskComplete';
+import { DeleteTaskUseCase } from '../../../application/usecases/DeleteTask';
 import type { TaskRepository } from '../../../domain/repositories/TaskRepository';
 import { buildTaskRoutes } from '../tasks';
 
-function buildTestServer(repository: TaskRepository): FastifyInstance {
+function buildTestServer(repository: TaskRepository, deleteTask?: DeleteTaskUseCase): FastifyInstance {
   const server = Fastify({ logger: false });
 
   server.register(
@@ -15,6 +16,7 @@ function buildTestServer(repository: TaskRepository): FastifyInstance {
       new CreateTaskUseCase(repository),
       new GetAllTasksUseCase(repository),
       new MarkTaskCompleteUseCase(repository),
+      deleteTask ?? new DeleteTaskUseCase(repository),
     ),
   );
 
@@ -34,6 +36,7 @@ describe('Task routes', () => {
         save: vi.fn().mockImplementation(async (task: Task) => task),
         findAll: vi.fn(),
         findById: vi.fn(),
+        delete: vi.fn(),
       });
     });
 
@@ -74,6 +77,7 @@ describe('Task routes', () => {
         save: vi.fn(),
         findAll: vi.fn().mockResolvedValue([]),
         findById: vi.fn(),
+        delete: vi.fn(),
       });
 
       const response = await server.inject({
@@ -96,6 +100,7 @@ describe('Task routes', () => {
         save: vi.fn(),
         findAll: vi.fn().mockResolvedValue(tasks),
         findById: vi.fn(),
+        delete: vi.fn(),
       });
 
       const response = await server.inject({
@@ -118,6 +123,7 @@ describe('Task routes', () => {
         save: vi.fn(),
         findAll,
         findById: vi.fn(),
+        delete: vi.fn(),
       });
 
       await server.inject({
@@ -136,6 +142,7 @@ describe('Task routes', () => {
         save: vi.fn(),
         findAll,
         findById: vi.fn(),
+        delete: vi.fn(),
       });
 
       await server.inject({
@@ -156,6 +163,7 @@ describe('Task routes', () => {
         save: vi.fn().mockImplementation(async (task: Task) => task),
         findAll: vi.fn(),
         findById: vi.fn().mockResolvedValue(existingTask),
+        delete: vi.fn(),
       });
 
       const response = await server.inject({
@@ -176,6 +184,7 @@ describe('Task routes', () => {
         save: vi.fn(),
         findAll: vi.fn(),
         findById: vi.fn().mockResolvedValue(null),
+        delete: vi.fn(),
       });
 
       const response = await server.inject({
@@ -195,6 +204,7 @@ describe('Task routes', () => {
         save: vi.fn().mockImplementation(async (task: Task) => task),
         findAll: vi.fn(),
         findById: vi.fn().mockResolvedValue(existingTask),
+        delete: vi.fn(),
       });
 
       const response = await server.inject({
@@ -213,6 +223,7 @@ describe('Task routes', () => {
         save: vi.fn(),
         findAll: vi.fn(),
         findById: vi.fn(),
+        delete: vi.fn(),
       });
 
       const response = await server.inject({
@@ -230,6 +241,7 @@ describe('Task routes', () => {
         save: vi.fn(),
         findAll: vi.fn(),
         findById: vi.fn(),
+        delete: vi.fn(),
       });
 
       const response = await server.inject({
@@ -249,6 +261,7 @@ describe('Task routes', () => {
         save: vi.fn().mockImplementation(async (task: Task) => task),
         findAll: vi.fn(),
         findById: vi.fn().mockResolvedValue(existingTask),
+        delete: vi.fn(),
       });
 
       const response = await server.inject({
@@ -260,6 +273,54 @@ describe('Task routes', () => {
       // Fastify coerces null → false for type: 'boolean'
       expect(response.statusCode).toBe(200);
       expect(response.json().completed).toBe(false);
+      await server.close();
+    });
+  });
+
+  describe('DELETE /tasks/:id', () => {
+    it('should delete a task and return 204', async () => {
+      const existingTask = new Task('abc-123', 'My task', 'Desc', false, new Date());
+
+      const deleteTaskMock = {
+        execute: vi.fn().mockResolvedValue(true),
+      };
+
+      server = buildTestServer({
+        save: vi.fn(),
+        findAll: vi.fn(),
+        findById: vi.fn().mockResolvedValue(existingTask),
+        delete: vi.fn(),
+      }, deleteTaskMock as unknown as DeleteTaskUseCase);
+
+      const response = await server.inject({
+        method: 'DELETE',
+        url: '/tasks/abc-123',
+      });
+
+      expect(response.statusCode).toBe(204);
+      expect(deleteTaskMock.execute).toHaveBeenCalledWith('abc-123');
+      await server.close();
+    });
+
+    it('should return 404 when task does not exist', async () => {
+      const deleteTaskMock = {
+        execute: vi.fn().mockResolvedValue(false),
+      };
+
+      server = buildTestServer({
+        save: vi.fn(),
+        findAll: vi.fn(),
+        findById: vi.fn(),
+        delete: vi.fn(),
+      }, deleteTaskMock as unknown as DeleteTaskUseCase);
+
+      const response = await server.inject({
+        method: 'DELETE',
+        url: '/tasks/nonexistent',
+      });
+
+      expect(response.statusCode).toBe(404);
+      expect(response.json()).toEqual({ error: 'Task not found' });
       await server.close();
     });
   });
