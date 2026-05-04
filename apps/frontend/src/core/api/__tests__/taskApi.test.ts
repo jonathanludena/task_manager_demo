@@ -130,4 +130,40 @@ describe('taskApi', () => {
       await expect(taskApi.completeTask('999')).rejects.toThrow('Failed to complete task');
     });
   });
+
+  describe('deleteTask', () => {
+    it('should DELETE task and resolve on 204', async () => {
+      vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+        ok: true,
+        status: 204,
+        statusText: 'No Content',
+      } as Response);
+
+      await taskApi.deleteTask('1');
+
+      expect(fetch).toHaveBeenCalledWith(`${API_URL}/tasks/1`, {
+        method: 'DELETE',
+      });
+    });
+
+    it('should throw when task not found (404)', async () => {
+      vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+        ok: false,
+        status: 404,
+        statusText: 'Not Found',
+      } as Response);
+
+      await expect(taskApi.deleteTask('999')).rejects.toThrow('Failed to delete task');
+    });
+
+    it('should throw on server error (500)', async () => {
+      vi.spyOn(globalThis, 'fetch').mockResolvedValue({
+        ok: false,
+        status: 500,
+        statusText: 'Internal Server Error',
+      } as Response);
+
+      await expect(taskApi.deleteTask('1')).rejects.toThrow('Failed to delete task');
+    });
+  });
 });

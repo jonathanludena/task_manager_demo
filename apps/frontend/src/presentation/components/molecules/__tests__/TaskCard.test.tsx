@@ -79,4 +79,33 @@ describe('TaskCard', () => {
 
     expect(screen.getByText('Completada')).toBeInTheDocument();
   });
+
+  describe('onDelete prop', () => {
+    it('renders a delete button when onDelete is provided', () => {
+      render(<TaskCard task={incompleteTask} onToggle={vi.fn()} onDelete={vi.fn()} />);
+
+      const deleteBtn = screen.getByRole('button', { name: /eliminar/i });
+      expect(deleteBtn).toBeInTheDocument();
+    });
+
+    it('calls onDelete with task id when delete button is clicked', async () => {
+      const onDelete = vi.fn();
+      const { user } = render(
+        <TaskCard task={incompleteTask} onToggle={vi.fn()} onDelete={onDelete} />,
+      );
+
+      const deleteBtn = screen.getByRole('button', { name: /eliminar/i });
+      await user.click(deleteBtn);
+
+      expect(onDelete).toHaveBeenCalledWith('1');
+      expect(onDelete).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not render delete button when onDelete is not provided', () => {
+      render(<TaskCard task={incompleteTask} onToggle={vi.fn()} />);
+
+      const deleteBtn = screen.queryByRole('button', { name: /eliminar/i });
+      expect(deleteBtn).not.toBeInTheDocument();
+    });
+  });
 });

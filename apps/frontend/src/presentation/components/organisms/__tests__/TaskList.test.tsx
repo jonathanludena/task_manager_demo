@@ -29,4 +29,32 @@ describe('TaskList', () => {
     expect(switches[0]).toHaveAttribute('aria-checked', 'false');
     expect(switches[1]).toHaveAttribute('aria-checked', 'true');
   });
+
+  describe('onDelete prop', () => {
+    it('forwards onDelete to TaskCard and renders delete buttons', () => {
+      render(<TaskList tasks={tasks} onComplete={vi.fn()} onDelete={vi.fn()} />);
+
+      const deleteBtns = screen.getAllByRole('button', { name: /eliminar/i });
+      expect(deleteBtns).toHaveLength(2);
+    });
+
+    it('calls onDelete with task id when delete is clicked', async () => {
+      const onDelete = vi.fn();
+      const { user } = render(
+        <TaskList tasks={tasks} onComplete={vi.fn()} onDelete={onDelete} />,
+      );
+
+      const deleteBtns = screen.getAllByRole('button', { name: /eliminar/i });
+      await user.click(deleteBtns[0]!);
+
+      expect(onDelete).toHaveBeenCalledWith('1');
+    });
+
+    it('does not render delete buttons when onDelete is not provided', () => {
+      render(<TaskList tasks={tasks} onComplete={vi.fn()} />);
+
+      const deleteBtns = screen.queryAllByRole('button', { name: /eliminar/i });
+      expect(deleteBtns).toHaveLength(0);
+    });
+  });
 });

@@ -2,6 +2,7 @@ import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import type { CreateTaskUseCase } from '../../application/usecases/CreateTask';
 import type { GetAllTasksUseCase } from '../../application/usecases/GetAllTasks';
 import type { MarkTaskCompleteUseCase } from '../../application/usecases/MarkTaskComplete';
+import type { DeleteTaskUseCase } from '../../application/usecases/DeleteTask';
 
 interface CreateTaskBody {
   title: string;
@@ -36,6 +37,7 @@ export function buildTaskRoutes(
   createTask: CreateTaskUseCase,
   getAllTasks: GetAllTasksUseCase,
   markTaskComplete: MarkTaskCompleteUseCase,
+  deleteTask: DeleteTaskUseCase,
 ) {
   return async function (server: FastifyInstance): Promise<void> {
     server.post<{ Body: CreateTaskBody }>(
@@ -78,6 +80,20 @@ export function buildTaskRoutes(
         }
 
         return reply.send(task);
+      },
+    );
+
+    server.delete<{ Params: { id: string } }>(
+      '/tasks/:id',
+      async (
+        request: FastifyRequest<{ Params: { id: string } }>,
+        reply: FastifyReply,
+      ) => {
+        const deleted = await deleteTask.execute(request.params.id);
+        if (!deleted) {
+          return reply.status(404).send({ error: 'Task not found' });
+        }
+        return reply.status(204).send();
       },
     );
   };

@@ -8,4 +8,5 @@ export interface TaskRepository {
   save(task: Task): Promise<Task>;
   findAll(filters?: TaskFilters): Promise<Task[]>;
   findById(id: string): Promise<Task | null>;
+  delete(id: string): Promise<boolean>;
 }

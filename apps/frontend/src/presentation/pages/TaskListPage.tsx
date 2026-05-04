@@ -3,6 +3,16 @@ import { TaskList } from '@/presentation/components/organisms/TaskList';
 import { TaskFilters } from '@/presentation/components/molecules/TaskFilters';
 import { taskApi } from '@/core/api/taskApi';
 import { notifyTasksUpdated } from '@/lib/taskEvents';
+import {
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogFooter,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogAction,
+  AlertDialogCancel,
+} from '@/components/ui/alert-dialog';
 import type { TaskDTO } from '@/core/api/taskApi';
 import type { TaskFilters as TaskFiltersParams } from '@task-manager/shared';
 
@@ -12,6 +22,7 @@ export function TaskListPage() {
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState('');
+  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
 
   const fetchTasks = useCallback(async (searchTerm: string, statusFilter: string) => {
     setLoading(true);
@@ -66,6 +77,35 @@ export function TaskListPage() {
     }
   };
 
+  const handleDeleteClick = (id: string) => {
+    setPendingDeleteId(id);
+  };
+
+  const handleDeleteCancel = () => {
+    setPendingDeleteId(null);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!pendingDeleteId) return;
+
+    const idToDelete = pendingDeleteId;
+    const previousTasks = tasks;
+    setPendingDeleteId(null);
+    setError(null);
+
+    // Optimistic update
+    setTasks((prev) => prev.filter((t) => t.id !== idToDelete));
+
+    try {
+      await taskApi.deleteTask(idToDelete);
+      notifyTasksUpdated();
+    } catch {
+      setError('Error al eliminar la tarea');
+      // Restore the task that was optimistically removed
+      setTasks(previousTasks);
+    }
+  };
+
   return (
     <div className="mx-auto max-w-2xl px-4">
       {/* Heading: se pierde al scrollear (normal flow) */}
@@ -96,9 +136,38 @@ export function TaskListPage() {
             Cargando...
           </div>
         ) : (
-          <TaskList tasks={tasks} onComplete={handleToggle} />
+          <TaskList
+            tasks={tasks}
+            onComplete={handleToggle}
+            onDelete={handleDeleteClick}
+          />
         )}
       </div>
+
+      {/* AlertDialog for delete confirmation */}
+      <AlertDialog
+        open={pendingDeleteId !== null}
+        onOpenChange={(open) => {
+          if (!open) handleDeleteCancel();
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Eliminar tarea</AlertDialogTitle>
+            <AlertDialogDescription>
+              ¿Estás seguro de que deseas eliminar esta tarea? Esta acción no se puede deshacer.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={handleDeleteCancel}>
+              Cancelar
+            </AlertDialogCancel>
+            <AlertDialogAction variant="destructive" onClick={handleDeleteConfirm}>
+              Confirmar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

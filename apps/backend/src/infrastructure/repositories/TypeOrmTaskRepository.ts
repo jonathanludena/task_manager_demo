@@ -28,4 +28,9 @@ export class TypeOrmTaskRepository implements TaskRepository {
   async findById(id: string): Promise<Task | null> {
     return this.dataSource.manager.findOneBy(Task, { id });
   }
+
+  async delete(id: string): Promise<boolean> {
+    const result = await this.dataSource.manager.delete(Task, id);
+    return (result.affected ?? 0) > 0;
+  }
 }

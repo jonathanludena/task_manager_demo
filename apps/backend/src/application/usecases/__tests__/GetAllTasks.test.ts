@@ -9,6 +9,7 @@ describe('GetAllTasksUseCase', () => {
       save: vi.fn(),
       findAll: vi.fn().mockResolvedValue([]),
       findById: vi.fn(),
+      delete: vi.fn(),
     };
 
     const useCase = new GetAllTasksUseCase(mockRepository);
@@ -29,6 +30,7 @@ describe('GetAllTasksUseCase', () => {
       save: vi.fn(),
       findAll: vi.fn().mockResolvedValue(tasks),
       findById: vi.fn(),
+      delete: vi.fn(),
     };
 
     const useCase = new GetAllTasksUseCase(mockRepository);
