@@ -19,7 +19,7 @@ export const env = {
   DB_PASSWORD: getEnvVar('DB_PASSWORD', 'postgres'),
   DB_NAME: getEnvVar('DB_NAME', 'task_manager'),
   NODE_ENV: getEnvVar('NODE_ENV', 'development'),
-  CORS_ORIGIN: getEnvVar('CORS_ORIGIN', 'https://app-challenge-0526.lproconsulting.com'),
+  CORS_ORIGIN: getEnvVar('CORS_ORIGIN', 'http://localhost:5173'),
   RATE_LIMIT_MAX: getEnvVarAsNumber('RATE_LIMIT_MAX', 100),
   RATE_LIMIT_WINDOW_MS: getEnvVarAsNumber('RATE_LIMIT_WINDOW_MS', 60000),
   INTERNAL_SECRET: getEnvVar('INTERNAL_SECRET', ''),

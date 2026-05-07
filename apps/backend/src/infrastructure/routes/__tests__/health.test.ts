@@ -28,11 +28,11 @@ describe('Health route', () => {
     const response = await server.inject({
       method: 'GET',
       url: '/health',
-      headers: { origin: 'https://app-challenge-0526.lproconsulting.com' },
+      headers: { origin: 'http://localhost:5173' },
     });
 
     expect(response.statusCode).toBe(200);
     // After securityPlugin is registered, CORS headers should be present
-    expect(response.headers['access-control-allow-origin']).toBe('https://app-challenge-0526.lproconsulting.com');
+    expect(response.headers['access-control-allow-origin']).toBe('http://localhost:5173');
   });
 });

@@ -1,18 +1,4 @@
 services:
-  nginx:
-    image: nginx:alpine
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./certbot/www:/var/www/certbot:ro
-      - ./ssl-certs:/etc/nginx/ssl:ro
-    depends_on:
-      - frontend
-      - backend
-    restart: unless-stopped
-
   frontend:
     image: challenge-frontend
     build:
@@ -41,7 +27,7 @@ services:
       DB_PASSWORD: ${DB_PASSWORD:-postgres}
       DB_NAME: task_manager
       NODE_ENV: production
-      CORS_ORIGIN: ${CORS_ORIGIN:-https://app-challenge-0526.lproconsulting.com}
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:5173}
       RATE_LIMIT_MAX: ${RATE_LIMIT_MAX:-100}
       RATE_LIMIT_WINDOW_MS: ${RATE_LIMIT_WINDOW_MS:-60000}
       INTERNAL_SECRET: ${INTERNAL_SECRET:-}
@@ -64,15 +50,6 @@ services:
       timeout: 5s
       retries: 5
     restart: unless-stopped
-
-  certbot:
-    image: certbot/certbot
-    profiles:
-      - certbot
-    volumes:
-      - ./certbot/www:/var/www/certbot
-      - ./certbot/conf:/etc/letsencrypt
-    restart: "no"
 
 volumes:
   pgdata:
