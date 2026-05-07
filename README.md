@@ -19,9 +19,8 @@ Este proyecto es un **challenge técnico** que implementa un sistema de gestión
 | **Tests unitarios e integración** | Vitest + React Testing Library + MSW (Mock Service Worker)    |
 | **E2E**          | Playwright                                                                 |
 | **Contenedores** | Docker & Docker Compose (multi-stage builds)                               |
-| **CI/CD**        | GitHub Actions (lint → typecheck → build → test → e2e → deploy)           |
-| **Proxy / SSL**  | nginx (edge reverse proxy) + Let's Encrypt (certbot webroot)               |
-| **Despliegue**   | VPS Hostinger — SSH + GHCR (GitHub Container Registry)                    |
+| **CI**           | GitHub Actions (lint, typecheck, test, e2e)                               |
+| **Despliegue**   | Render Blueprint (`render.yaml`)                                          |
 
 ---
 
@@ -212,74 +211,27 @@ pnpm --filter @task-manager/frontend test
 pnpm test:e2e
 ```
 
-### Despliegue en producción
+### Despliegue en Render
 
-```bash
-# Primer deploy (con staging de Let's Encrypt para probar sin rate limits)
-STAGING=true bash deploy.sh
+El despliegue productivo está definido en `render.yaml`. Render crea tres recursos desde el blueprint:
 
-# Verificar en https://app-challenge-0526.lproconsulting.com
+| Servicio | Runtime | Rol |
+| :------- | :------ | :-- |
+| `task-manager-frontend` | Docker | Sirve el build de Vite y proxya `/tasks` y `/health` hacia la API |
+| `task-manager-api` | Docker | API Fastify + TypeORM |
+| `task-manager-db` | PostgreSQL gestionado | Base de datos relacional |
 
-# Certificados reales
-STAGING=false bash deploy.sh
-```
+Flujo operativo:
 
-### Producción — VPS Hostinger
-
-La aplicación está desplegada en un **VPS Hostinger** con Ubuntu, accesible vía:
-
-| Servicio   | URL                                          |
-| :--------- | :------------------------------------------- |
-| **Frontend** | [`https://app-challenge-0526.lproconsulting.com`](https://app-challenge-0526.lproconsulting.com) |
-| **Backend**  | [`https://api-challenge-0526.lproconsulting.com`](https://api-challenge-0526.lproconsulting.com) |
-
-#### Infraestructura del deploy
-
-```
-Internet ──► VPS Hostinger (puertos 80, 443)
-                 │
-                 ▼
-         ┌───────────────┐
-         │  nginx:alpine  │ ← Edge proxy: SSL termination + subdomain routing
-         │  puertos 80/443│   TLS 1.2+ | Mozilla Intermediate
-         └───┬───────┬───┘
-             │       │
-       app-challenge  api-challenge
-             │       │
-         ┌───▼──┐ ┌──▼──────┐
-         │front │ │ backend  │ ← Red interna Docker
-         │end   │ │ :3000    │
-         │:80   │ │ Fastify  │
-         └──┬───┘ └──┬──────┘
-            │        │
-            └────┬───┘
-                 │
-           ┌─────▼─────┐
-           │ postgres  │
-           │ :5432     │
-           │ volumen   │
-           │ pgdata    │
-           └───────────┘
-
-certbot (on-demand via --profile certbot) → Let's Encrypt webroot → ./certbot/{conf,www}
-         ↓ self-signed bootstrap → staging → production
-```
-
-#### Componentes
-
-| Servicio    | Imagen / Build                               | Rol                              |
-| :---------- | :------------------------------------------- | :------------------------------- |
-| **nginx**   | `nginx:alpine`                               | Edge reverse proxy, SSL, routing |
-| **frontend**| Build multi-stage (node → nginx)             | SPA React, proxy `/tasks` a API |
-| **backend** | Build multi-stage (pnpm deploy)              | API Fastify + TypeORM            |
-| **postgres**| `postgres:16-alpine`                         | Base de datos relacional         |
-| **certbot** | `certbot/certbot` (perfil `certbot`)         | Certificados Let's Encrypt       |
+1. Conectar el repositorio en Render Dashboard.
+2. Render detecta `render.yaml` y crea los servicios.
+3. Cada push a `main` dispara el redeploy automático de Render.
 
 #### Seguridad — 3 capas en backend
 
 | Capa          | Mecanismo                                     |
 | :------------ | :-------------------------------------------- |
-| **CORS**      | `@fastify/cors` — solo `app-challenge-0526...` |
+| **CORS**      | `@fastify/cors` — origen configurable por entorno |
 | **Rate-limit**| `@fastify/rate-limit` — 100 req/min por IP    |
 | **Shared Secret** | Header `X-Internal-Secret` inyectado por frontend nginx, validado por backend con `crypto.timingSafeEqual` |
 
@@ -300,16 +252,15 @@ docker compose exec backend pnpm migration:revert
 
 ---
 
-## 🚀 CI/CD (GitHub Actions)
+## 🚀 CI (GitHub Actions)
 
-El pipeline se ejecuta en `push` y `pull_request` a `main`. El deploy solo ocurre en `push` a `main`.
+El pipeline se ejecuta en `push` y `pull_request` a `main`. GitHub Actions mantiene solo quality gates; el despliegue lo gestiona Render.
 
 ```
-push/PR ──► lint ──┐
-                   ├──► test ──┐
-        ──► typecheck ─┘       ├──► deploy (main push only)
-                   ├──► test-e2e ─┘
-        ──► build (main push only, GHCR) ─┘
+push/PR ──► lint ──────┐
+                       ├──► test
+        ──► typecheck ─┤
+                       └──► test-e2e
 ```
 
 | Job        | Comando                                | ¿Cuándo?                          |
@@ -318,29 +269,6 @@ push/PR ──► lint ──┐
 | **typecheck**  | `pnpm -r typecheck`                | push y PR                         |
 | **test**       | `pnpm -r test`                     | push y PR (needs lint + typecheck)|
 | **test-e2e**   | `pnpm test:e2e`                    | push y PR (needs lint + typecheck)|
-| **build**      | Docker Buildx → push a GHCR         | push a main (needs lint + typecheck) |
-| **deploy**     | SSH → `bash deploy.sh`             | push a main (needs build + test + test-e2e) |
-
-### Deploy Script (`deploy.sh`)
-
-El script que se ejecuta en el VPS vía SSH realiza:
-
-```
-git pull → generar cert self-signed (si no hay real) → docker compose down
-→ pull imágenes de GHCR (o build local como fallback)
-→ docker compose up -d → migrations (automáticas en startup)
-→ esperar nginx → certbot (webroot, staging o producción)
-→ copiar certs → reload nginx → docker image prune
-```
-
-### Secrets de GitHub Requeridos
-
-| Secret          | Descripción                          |
-| :-------------- | :----------------------------------- |
-| `VPS_HOST`      | IP del VPS Hostinger                |
-| `VPS_USER`      | Usuario SSH (`friday`)              |
-| `VPS_SSH_KEY`   | Clave privada SSH                    |
-| `VPS_APP_PATH`  | Ruta del repo en VPS (`/home/friday/app`) |
 
 ---
 
@@ -357,8 +285,7 @@ git pull → generar cert self-signed (si no hay real) → docker compose down
 | **Tailwind CSS 4 + shadcn/ui**  | Sistema de diseño consistente sin runtime CSS, componentes headless     |
 | **Docker multi-stage**          | Imágenes finales mínimas (~100MB frontend, ~150MB backend)              |
 | **pnpm deploy**                 | `node_modules` plano (sin symlinks) para imágenes Docker reproducibles    |
-| **Dos capas de nginx**          | Edge proxy (SSL) + frontend nginx (SPA + proxy interno) sin tocar la app |
-| **certbot webroot**             | Sin necesidad de detener nginx para renovar certs — HTTP-01 challenge    |
+| **Render Blueprint**            | Infraestructura productiva declarativa y versionada en `render.yaml`     |
 | **validate-if-present** (secret)| Ruta API externa funciona sin secret, solo CORS + rate-limit               |
 
 ---
@@ -393,6 +320,7 @@ git pull → generar cert self-signed (si no hay real) → docker compose down
 │       └── vitest.config.ts
 ├── docker-compose.yml
 ├── docker-compose.local.yml
+├── render.yaml
 ├── .github/workflows/ci.yml
 └── BLUEPRINT.md
 ```
